@@ -1,0 +1,40 @@
+def test_root_redirects_to_static_index(client):
+    # Arrange
+    redirect_path = "/static/index.html"
+
+    # Act
+    response = client.get("/", follow_redirects=False)
+
+    # Assert
+    assert response.status_code == 307
+    assert response.headers["location"] == redirect_path
+
+
+def test_get_activities_returns_activity_details(client):
+    # Arrange
+    expected_activity = "Chess Club"
+
+    # Act
+    response = client.get("/activities")
+
+    # Assert
+    assert response.status_code == 200
+    activities = response.json()
+    assert expected_activity in activities
+    assert {
+        "description",
+        "schedule",
+        "max_participants",
+        "participants",
+    } <= activities[expected_activity].keys()
+
+
+def test_signup_requires_email(client):
+    # Arrange
+    activity_name = "Chess Club"
+
+    # Act
+    response = client.post(f"/activities/{activity_name}/signup")
+
+    # Assert
+    assert response.status_code == 422
